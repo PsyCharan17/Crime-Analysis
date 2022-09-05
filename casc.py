@@ -9,14 +9,13 @@ crime_df=pd.read_csv('P7.csv',usecols=[0,1,2,3,4,5,6,7,8,9],nrows=5128)
 #crime_df=crime_df.astype(str)
 
 
-
 df_c=crime_df.dropna()
-df_c['day'] =pd.to_datetime(df_c['Create Date/Time'],dayfirst=True)
+df_c['day'] =pd.to_datetime(df_c['Create_Date_Time'],dayfirst=True)
 df_c['day']=pd.to_datetime(df_c['day'],yearfirst=True)
 new_df = pd.read_csv("P7.csv")
 new_df.dropna(inplace=True)
-df_c['Create Date/Time']=new_df['Create Date/Time']
-df_c['Time']=pd.to_datetime(df_c['Create Date/Time']).dt.time
+df_c['Create_Date_Time']=new_df['Create_Date_Time']
+df_c['Time']=pd.to_datetime(df_c['Create_Date_Time']).dt.time
 df_c['Prop_date']=(df_c['day']).dt.strftime('%d/%m/%Y')
 month = pd.to_datetime(df_c['Prop_date'],dayfirst=True).dt.strftime('%m')
 df_c['month']=month
@@ -30,12 +29,12 @@ c = st.sidebar.multiselect("Select the Circle:",
             default=df_c["Circle"].unique()
         )
 ps = st.sidebar.multiselect(
-            "Select the Police Station:",
-            options=df_c["Police Station"].unique(),
-            default=df_c["Police Station"].unique()
+            "Select the Police_Station:",
+            options=df_c["Police_Station"].unique(),
+            default=df_c["Police_Station"].unique()
         )
 
-df_c.rename(columns = {"Police Station":"Police_Station"}, inplace = True)
+df_c.rename(columns = {"Police_Station":"Police_Station"}, inplace = True)
 
 df_selection = df_c.query(
     "month == @month & Circle == @c & Police_Station == @ps"
@@ -67,13 +66,13 @@ st.markdown("""---""")
 
 
 #Crimes in Lucknow
-x = df_selection.drop(columns=['District', 'Event', 'Circle', 'Police_Station', 'Caller Source', 'Event Sub-Type'])
-x2 = df_selection['Event Type']
-df2 = x.sort_values(by=['Event Type'])
+x = df_selection.drop(columns=['District', 'Event', 'Circle', 'Police_Station', 'Caller_Source', 'Event_Sub_Type'])
+x2 = df_selection['Event_Type']
+df2 = x.sort_values(by=['Event_Type'])
 df_ = x.drop(columns=['Latitude', 'Longitude', 'day', 'Time', 'Prop_date', 'month'])
-count1 = df_.groupby(['Event Type']).count()
-count1.rename(columns = {'Event Type':'Event type', 
-                       'Create Date/Time':'No. of crimes'}, 
+count1 = df_.groupby(['Event_Type']).count()
+count1.rename(columns = {'Event_Type':'Event type', 
+                       'Create_Date_Time':'No. of crimes'}, 
             inplace = True)
 s = px.bar(
     count1,
@@ -87,10 +86,10 @@ s = px.bar(
 st.plotly_chart(s)
 
 #Crimes based on Month(bar)
-x3=x.drop(columns=['Create Date/Time','day'])
+x3=x.drop(columns=['Create_Date_Time','day'])
 x4=x3.drop(columns=['Latitude','Longitude','Prop_date','Time'])
 count4=x4.groupby(['month']).count()
-count4.rename(columns={'month':'Month','Event Type':'No. of crimes'},inplace=True)
+count4.rename(columns={'month':'Month','Event_Type':'No. of crimes'},inplace=True)
 #count4.index=['April','May','June']
 g=px.bar(
     count4,
@@ -117,11 +116,11 @@ g1=px.pie(
 st.plotly_chart(g1)
 
 #Top 5 crimes
-top_5_crimes = x3['Event Type'].value_counts().sort_values(ascending=False).head()
-temp = x3.groupby('Event Type').agg({"month": "count"})
+top_5_crimes = x3['Event_Type'].value_counts().sort_values(ascending=False).head()
+temp = x3.groupby('Event_Type').agg({"month": "count"})
 temp = temp.sort_values(by=['month'], ascending=False).head()
 temp = temp.sort_values(by='month', ascending=True)
-temp.rename(columns={'month':'No. of crimes','Event Type':'Event Type'},inplace=True)
+temp.rename(columns={'month':'No. of crimes','Event_Type':'Event_Type'},inplace=True)
 g2=px.bar(
     temp,
     title="<b>Top 5 crimes</b>",
@@ -139,7 +138,7 @@ st.plotly_chart(g2)
 x3['Week'] = pd.to_datetime(x['day']).dt.day_name()
 x7=x3.groupby(['Week']).count()
 x7=x7.drop(columns=['Latitude','Longitude','Time','Prop_date','month'])
-x7.rename(columns={'Week':'Week','Event Type':'No. of crimes'},inplace=True)
+x7.rename(columns={'Week':'Week','Event_Type':'No. of crimes'},inplace=True)
 g3=px.bar(
     x7,
     title="<b>Crimes Based on Days</b>",
@@ -164,7 +163,7 @@ test1 = test
 test1 = test1.groupby(['Hour_Day']).count()
 test2 = test1.drop(columns=['Latitude', 'Longitude', 'Prop_date', 'Time', 'month', 'Week'])
 test2.rename(columns = {'Hour_Day':'Hour_Day', 
-                       'Event Type':'No. of crimes'}, 
+                       'Event_Type':'No. of crimes'}, 
             inplace = True)
 g4 = px.bar(
       test2,
@@ -185,6 +184,6 @@ from streamlit_folium import folium_static
 import folium
 my_map = folium.Map(location=[26.850000, 81.000], zoom_start=16, prefer_canvas=True, min_zoom=12, max_zoom=18)
 for _, l in x3.iterrows():
-    folium.CircleMarker(location=[l['Latitude'], l['Longitude']], popup=[l['Latitude'], l['Longitude']], tooltip=[l['Event Type']], radius=3, color='red', fill=True, fill_color='red', fill_opacity=1,).add_to(my_map)
+    folium.CircleMarker(location=[l['Latitude'], l['Longitude']], popup=[l['Latitude'], l['Longitude']], tooltip=[l['Event_Type']], radius=3, color='red', fill=True, fill_color='red', fill_opacity=1,).add_to(my_map)
 my_map
 folium_static(my_map)
